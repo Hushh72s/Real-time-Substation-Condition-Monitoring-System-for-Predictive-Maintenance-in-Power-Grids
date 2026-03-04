@@ -1,9 +1,17 @@
 from fastapi import FastAPI
 from cassandra.cluster import Cluster
 import time
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Retry loop for Cassandra connection
 connected = False
 while not connected:

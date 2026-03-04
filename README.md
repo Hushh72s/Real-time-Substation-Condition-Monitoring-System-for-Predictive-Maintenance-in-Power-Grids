@@ -25,3 +25,10 @@ Server starts at:
 
 http://127.0.0.1:8000
 
+run:
+```
+python consumer_engine.py
+```
+If working correctly, you’ll see:
+
+Consumer running...
