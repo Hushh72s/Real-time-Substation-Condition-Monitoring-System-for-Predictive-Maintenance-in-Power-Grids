@@ -19,6 +19,8 @@ from cassandra.cluster import Cluster
 import numpy as np
 import joblib
 
+DEVICE_ID = "substation-1"   # logical device name used as partition key
+
 # ─────────────────────────────────────────────
 # Thresholds for rule-based severity override
 # (IsolationForest catches statistical outliers;
@@ -84,20 +86,26 @@ session.execute("""
 """)
 session.set_keyspace("substation")
 
-# Drop and recreate table to add new columns (only needed on schema upgrade)
+# ── Schema migration: drop old UUID-keyed table if it exists ──────────────
+# The old table had no ordering, so LIMIT 1 never returned the newest row.
+# New schema: (device_id, ts) composite key with CLUSTERING ORDER BY ts DESC
+# so that LIMIT 1 always gives the most recent reading.
+session.execute("DROP TABLE IF EXISTS sensor_data;")
+
 session.execute("""
-    CREATE TABLE IF NOT EXISTS sensor_data (
-        id        UUID PRIMARY KEY,
-        ts        timestamp,
+    CREATE TABLE sensor_data (
+        device_id   text,
+        ts          timestamp,
         temperature float,
         humidity    float,
         vibration   float,
         voltage     float,
         anomaly     boolean,
-        severity    text
-    );
+        severity    text,
+        PRIMARY KEY (device_id, ts)
+    ) WITH CLUSTERING ORDER BY (ts DESC);
 """)
-print("✅  Cassandra ready.")
+print("✅  Cassandra ready (schema v2 — ordered by ts DESC).")
 
 # ─────────────────────────────────────────────
 # Load ML Model
@@ -146,10 +154,11 @@ for msg in consumer:
     # ── Persist to Cassandra ───────────────────────────────────
     session.execute("""
         INSERT INTO sensor_data
-            (id, ts, temperature, humidity, vibration, voltage, anomaly, severity)
+            (device_id, ts, temperature, humidity, vibration, voltage, anomaly, severity)
         VALUES
-            (uuid(), %s, %s, %s, %s, %s, %s, %s)
+            (%s, %s, %s, %s, %s, %s, %s, %s)
     """, (
+        DEVICE_ID,
         ts_now,
         d["temperature"],
         d["humidity"],

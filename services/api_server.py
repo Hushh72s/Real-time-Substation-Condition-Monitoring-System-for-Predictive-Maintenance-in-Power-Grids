@@ -22,6 +22,8 @@ from cassandra import ReadTimeout
 import time
 import datetime
 
+DEVICE_ID = "substation-1"
+
 # ─────────────────────────────────────────────
 # App Init
 # ─────────────────────────────────────────────
@@ -89,7 +91,8 @@ def health():
 def latest():
     """Returns the single most recent sensor reading."""
     rows = session.execute(
-        "SELECT * FROM sensor_data LIMIT 1"
+        "SELECT * FROM sensor_data WHERE device_id = %s LIMIT 1",
+        (DEVICE_ID,)
     )
     for r in rows:
         return row_to_dict(r)
@@ -100,7 +103,8 @@ def latest():
 def history(limit: int = Query(default=50, ge=1, le=200, description="Number of rows to return")):
     """Returns the last N sensor readings (default 50, max 200)."""
     rows = session.execute(
-        f"SELECT * FROM sensor_data LIMIT {limit}"
+        "SELECT * FROM sensor_data WHERE device_id = %s LIMIT %s",
+        (DEVICE_ID, limit)
     )
     return [row_to_dict(r) for r in rows]
 
@@ -108,20 +112,21 @@ def history(limit: int = Query(default=50, ge=1, le=200, description="Number of 
 @app.get("/alerts", tags=["Alerts"])
 def alerts(limit: int = Query(default=20, ge=1, le=100, description="Number of alert rows to return")):
     """Returns only anomalous readings (anomaly=true), most recent first."""
-    # Cassandra doesn't support WHERE on non-partition keys without ALLOW FILTERING
     rows = session.execute(
-        f"SELECT * FROM sensor_data LIMIT 200"
+        "SELECT * FROM sensor_data WHERE device_id = %s LIMIT 200",
+        (DEVICE_ID,)
     )
     anomalies = [row_to_dict(r) for r in rows if r.anomaly]
-    # Sort by timestamp descending if ts exists
-    anomalies.sort(key=lambda x: x.get("ts", ""), reverse=True)
     return anomalies[:limit]
 
 
 @app.get("/stats", tags=["Analytics"])
 def stats():
     """Returns aggregate statistics (avg, min, max) across all stored readings."""
-    rows = session.execute("SELECT temperature, humidity, vibration, voltage FROM sensor_data LIMIT 1000")
+    rows = session.execute(
+        "SELECT temperature, humidity, vibration, voltage FROM sensor_data WHERE device_id = %s LIMIT 1000",
+        (DEVICE_ID,)
+    )
     data = list(rows)
 
     if not data:
@@ -151,7 +156,10 @@ def stats():
 @app.get("/severity", tags=["Analytics"])
 def severity_summary():
     """Returns a count breakdown of CRITICAL / WARNING / NORMAL from the last 100 rows."""
-    rows = session.execute("SELECT severity, anomaly FROM sensor_data LIMIT 100")
+    rows = session.execute(
+        "SELECT severity, anomaly FROM sensor_data WHERE device_id = %s LIMIT 100",
+        (DEVICE_ID,)
+    )
     counts = {"CRITICAL": 0, "WARNING": 0, "NORMAL": 0}
     total = 0
     for r in rows:
