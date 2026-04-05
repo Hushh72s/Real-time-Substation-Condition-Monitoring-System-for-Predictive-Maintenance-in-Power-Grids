@@ -1,18 +1,40 @@
-name: CI # Generic name so it doesn't look suspicious
+name: CI
 
 on:
   schedule:
-    - cron: '0 15 * * *' # Triggers at 3:00 PM UTC
+    - cron: '0 15 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run scripts
         run: |
+          COUNT_FILE=".build_cache_id"
+          
+          # Read the current count
+          if [ -f "$COUNT_FILE" ]; then
+            COUNT=$(cat "$COUNT_FILE")
+          else
+            COUNT=0
+          fi
+          
+          # If we have reached 8 commits, gracefully stop committing
+          if [ "$COUNT" -ge 8 ]; then
+             echo "We have reached our 8 days of automated commits. Going to sleep!"
+             exit 0
+          fi
+          
+          # Increment for today
+          COUNT=$((COUNT + 1))
+          echo "$COUNT" > "$COUNT_FILE"
+          
           # Array of very human-like commit messages
           MESSAGES=(
             "minor fixes"
@@ -30,17 +52,11 @@ jobs:
             "oops"
           )
           
-          # Pick a random message
           RANDOM_MSG=${MESSAGES[$RANDOM % ${#MESSAGES[@]}]}
           
-          # Use the user's actual name and email for stealth
           git config --global user.name "Hushh72s"
           git config --global user.email "asadityasinha136@gmail.com"
           
-          # Generate a random string to force a real diff on a dummy config file
-          # We'll use a file that looks like a normal config/cache file
-          echo "cache_id=${RANDOM}" > .build_cache
-          
-          git add .build_cache
+          git add "$COUNT_FILE"
           git commit -m "$RANDOM_MSG" || echo "No changes"
           git push
