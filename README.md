@@ -1,4 +1,4 @@
-# ⚡ Real-time Substation Condition Monitoring System
+# Real-time Substation Condition Monitoring System
 
 # Team Name : Byte Hogs
 
@@ -8,7 +8,7 @@ A full-stack IoT monitoring system that simulates substation sensor data, detect
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 [simulator.py]
@@ -45,7 +45,7 @@ A full-stack IoT monitoring system that simulates substation sensor data, detect
 
 ---
 
-## 🛠️ Prerequisites — Install These First
+## Prerequisites
 
 | Tool | Version | Download |
 |------|---------|----------|
@@ -58,7 +58,7 @@ A full-stack IoT monitoring system that simulates substation sensor data, detect
 
 ---
 
-## 🚀 Step-by-Step Setup
+## Setup
 
 ### 1. Clone the Repository
 
@@ -204,7 +204,7 @@ Opens automatically at: **http://localhost:3000**
 
 ---
 
-## 📡 API Endpoints Reference
+## API Endpoints
 
 Base URL: `http://127.0.0.1:8001`
 
@@ -221,7 +221,7 @@ Full interactive docs: http://127.0.0.1:8001/docs
 
 ---
 
-## 🖥️ Terminal Layout (Run All Together)
+## Running everything
 
 You need **5 terminals** open simultaneously:
 
@@ -236,7 +236,7 @@ Terminal 5  →  python simulator.py
 
 ---
 
-## 🛑 Stopping Everything
+## Stopping Everything
 
 ```bash
 # Stop Python services: Ctrl+C in each terminal
@@ -247,7 +247,7 @@ docker compose down
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
@@ -259,7 +259,7 @@ docker compose down
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
