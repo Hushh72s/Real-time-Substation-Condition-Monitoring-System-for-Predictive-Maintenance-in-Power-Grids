@@ -1,4 +1,4 @@
-# Real-time Substation Condition Monitoring System
+# Real-time Substation Condition Monitoring System for Predictive Maintenance in Power Grids
 
 # Team Name : Byte Hogs
 # Team ID : 26E4249
