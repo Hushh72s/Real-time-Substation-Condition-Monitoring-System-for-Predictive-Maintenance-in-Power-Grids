@@ -1,6 +1,6 @@
 
 
-# ✅ STEP 1 — Make Sure All Core Services Are Running
+# ✅ STEP 1 - Make Sure All Core Services Are Running
 
 ### 1️⃣ Check Docker Containers
 
