@@ -8,7 +8,7 @@ A full-stack IoT monitoring system that simulates substation sensor data, detect
 
 ---
 
-## System Architecture
+### System Architecture
 
 ```
 [simulator.py]
