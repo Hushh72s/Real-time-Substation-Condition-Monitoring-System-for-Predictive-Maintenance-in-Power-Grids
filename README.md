@@ -6,7 +6,7 @@
 
 A full-stack IoT monitoring system that simulates substation sensor data, detects anomalies using Machine Learning (IsolationForest), stores results in Apache Cassandra via Kafka, and displays live readings on a React dashboard.
 
----
+--
 
 ### System Architecture
 
